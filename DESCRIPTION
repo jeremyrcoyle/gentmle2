@@ -1,0 +1,14 @@
+Package: gentmle
+Title: Skeleton for General TMLEs
+Version: 0.0.0.9000
+Author: Jeremy Coyle <jeremyrcoyle@gmail.com>
+Maintainer: Jeremy Coyle <jeremyrcoyle@gmail.com>
+Description: Handles the bookkeeping for general TMLEs, allowing you to specify novel TMLEs as estimation and update functions.
+License: GPL-3
+Depends:
+    R (>= 3.0.0),
+    SuperLearner,
+    origami,
+    plyr,
+    ggplot2,
+    abind
