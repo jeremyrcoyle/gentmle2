@@ -77,7 +77,7 @@ Wnodes <- grep("^W", names(data), value = T)
 #     "SL.rpart", "SL.rpartPrune", "SL.mean")
 Q_library <- c("SL.glm","SL.step.forward", "SL.gam","SL.rpart", "SL.rpartPrune", "SL.mean")
 Q_fit=origami_SuperLearner(data$Y,data[,c("A",Wnodes)],SL.library=Q_library,family=binomial())
-Q_fit=glm(Y~A+W1,data=data,family=binomial(link="logit"))
+# Q_fit=glm(Y~A+W1,data=data,family=binomial(link="logit"))
 g_fit=multinomial_SuperLearner(data$A,data[,Wnodes])
 
 A_vals=sort(unique(data$A))
@@ -85,7 +85,7 @@ A_vals=sort(unique(data$A))
 Q_a <- sapply(A_vals, function(A_val) {
     newdata <- data[, c(Anode, Wnodes)]
     newdata[, Anode] <- A_vals[1]
-    predict(Q_fit, newdata)
+    predict(Q_fit, newdata)$pred
 })
 
 pA=predict(g_fit,newdata=data[,Wnodes])$pred
