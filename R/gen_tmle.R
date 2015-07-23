@@ -2,13 +2,19 @@ library(boot)
 ############## somewhat general TMLE framework takes initial data, an estimation function and
 ############## an update function can be used for arbitrary TMLEs
 
+# truncation function for Q so logistic regression doesn't break on Y close to 0
+# or 1
+#' @export
+truncate <- function(x, lower = 0.01, upper = 1 - lower) {
+    pmin(pmax(x, lower), upper)
+}
+
 # function to estimate logistic parametric submodel and get updated estimate
 # logistic fluctuation
-
 #' @export
-logit_fluctuate <- function(tmledata, flucmod, subset = seq_len(nrow(tmledata))) {
+logit_fluctuate <- function(tmledata, flucmod, truncate = 0) {
     suppressWarnings({
-        fluc <- glm(flucmod, data = tmledata[subset, ], family = "binomial")
+        fluc <- glm(flucmod, data = tmledata, family = "binomial")
     })
     list(eps = coef(fluc))
 }
@@ -21,7 +27,9 @@ logit_fluctuate <- function(tmledata, flucmod, subset = seq_len(nrow(tmledata)))
 #' @param update_fun, Function for update step
 #' @param max_iter, Maximum number of iteration steps
 #' @param ..., Extra arguments that can be passed to update_fun and estimate_fun
+#'
 #' @export
+#' @example /inst/examples/ey1_example.R
 gentmle <- function(initdata, estimate_fun, update_fun, max_iter = 100, ...) {
     converge <- F
     
