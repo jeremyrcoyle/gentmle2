@@ -117,7 +117,7 @@ eysi_estimate <- function(tmledata, ...) {
   pAstar = mapply(A_vals,FUN=function(x) apply(tmledata$pA,1,...,x))
   #   colnames(pAstar)=paste("gstar", seq_len(length(A_vals)), sep = "")
   tmledata$pAstar = pAstar
-  # compute the parameter under staochastic intervention for fixed g
+  # compute the parameter under stochastic intervention for fixed g
   psi <- mean(apply(tmledata$Q_a*tmledata$pAstar,1,sum))
   
   # which A popped up in reality
