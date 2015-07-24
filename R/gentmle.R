@@ -20,7 +20,7 @@ logit_fluctuate <- function(tmledata, flucmod, truncate = 0) {
 }
 
 
-#' @title gen_tmle
+#' @title gentmle
 #' @description General TMLE function that takes care of the bookkeeping of estimation and update steps.
 #' 
 #' @param estiamte_fun Function for estimation step
@@ -30,6 +30,7 @@ logit_fluctuate <- function(tmledata, flucmod, truncate = 0) {
 #'
 #' @export
 #' @example /inst/examples/ey1_example.R
+#' @example /inst/examples/eysi_example.R
 gentmle <- function(initdata, estimate_fun, update_fun, max_iter = 100, ...) {
     converge <- F
     
@@ -57,8 +58,40 @@ gentmle <- function(initdata, estimate_fun, update_fun, max_iter = 100, ...) {
     
     ED2 <- sapply(eststep$Dstar, function(x) mean(x^2))
     ED3 <- sapply(eststep$Dstar, function(x) mean(x^3))
-    list(initdata = initdata, tmledata = eststep$tmledata, initests = initests, tmleests = eststep$ests, 
-        steps = j, Dstar = eststep$Dstar, ED = ED, ED2 = ED2, ED3 = ED3)
+    result <- list(initdata = initdata, tmledata = eststep$tmledata, initests = initests, 
+        tmleests = eststep$ests, steps = j, Dstar = eststep$Dstar, ED = ED, ED2 = ED2, 
+        ED3 = ED3)
     
+    class(result) <- "gentmle"
+    
+    return(result)
+}
+
+#' @export
+ci_gentmle <- function(gentmle_obj, level = 0.95) {
+    
+    n <- nrow(gentmle_obj$initdata)
+    n_ests <- length(gentmle_obj$tmleests)
+    ldply(seq_len(n_ests), function(i) {
+        
+        est <- gentmle_obj$tmleests[i]
+        sd <- sqrt(gentmle_obj$ED2[i])/sqrt(n)
+        z <- (1 + level)/2
+        lower <- est - qnorm(z) * sd
+        upper <- est + qnorm(z) * sd
+        data.frame(parameter = names(est), est = est, sd = sd, lower = lower, upper = upper)
+    })
+}
+
+#' @export
+print.gentmle <- function(gentmle_obj) {
+    cat(sprintf("TMLE ran for %d step(s)\n", gentmle_obj$steps))
+    EDtext <- sprintf("E[%s]=%1.2e", names(gentmle_obj$ED), gentmle_obj$ED)
+    cat(sprintf("The mean of the IC is %s\n", paste(EDtext, collapse = ", ")))
+    
+    cat("\n\n")
+    print(ci_gentmle(gentmle_obj))
+    
+    cat("\n")
     
 } 
