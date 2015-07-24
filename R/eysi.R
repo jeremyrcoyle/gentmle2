@@ -8,15 +8,6 @@ library(plyr)
 library(dplyr)
 registerDoSNOW(makeCluster(4, type = "SOCK"))
 
-logit = function(x) qlogis(x)
-inv.logit= function(x) plogis(x)
-
-fluctuate=function(tmledata,flucmod,subset=seq_len(nrow(tmledata))){
-  suppressWarnings({fluc=glm(flucmod, data=tmledata[subset,],family = "binomial")})
-  list(eps=coef(fluc))
-  # summary(fluc)
-}
-
 Qbar0 <- function(A, W) {
   
   W1 <- W[, 1]
@@ -113,10 +104,10 @@ eysi_update <- function(tmledata, Q.trunc = 0.001) {
 # Stochastic intervention estimate for the mean
 eysi_estimate <- function(tmledata, ...) {
   
-  # assign probs under stochastic intervention and name columns
+  # assign probs under stochastic intervention
   pAstar = mapply(A_vals,FUN=function(x) apply(tmledata$pA,1,...,x))
-  #   colnames(pAstar)=paste("gstar", seq_len(length(A_vals)), sep = "")
   tmledata$pAstar = pAstar
+  
   # compute the parameter under stochastic intervention for fixed g
   psi <- mean(apply(tmledata$Q_a*tmledata$pAstar,1,sum))
   
