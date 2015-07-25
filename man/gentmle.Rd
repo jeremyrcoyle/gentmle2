@@ -19,6 +19,8 @@ gentmle(initdata, estimate_fun, update_fun, max_iter = 100, ...)
 General TMLE function that takes care of the bookkeeping of estimation and update steps.
 }
 \examples{
+###### Example of TMLE for the treatment-specific mean E[Y_1]
+
 Qbar0 <- function(A, W) {
     W1 <- W[, 1]
     W2 <- W[, 2]
@@ -57,6 +59,8 @@ print(result)
 tmledata2 <- data.frame(A = data$A, Y = data$Y, gk = gk, QAk = Qk, Q1k = Q1k, Q0k = Q0k)
 result2 <- gentmle(tmledata2, ey1_estimate2, ey1_update2)
 print(result2) 
+###### Example of TMLE for a stochastic intervention mean E[Y_gstar]
+
 Qbar0 <- function(A, W) {
     
     W1 <- W[, 1]
@@ -123,19 +127,27 @@ gstar <- function(A, gk) {
     ifelse(A == 1, gk[, 1] + gk[, 2], ifelse(A == 3, gk[, 3], 0))
 }
 
+gstar <- function(A, gk) {
+    rowSums(factor_to_indicators(A) * gk)
+}
+
 # Initial data set-up
-initdata <- data
+initdata <- as.list(data)
 initdata$Q_a <- Q_a
 initdata$pA <- pA
 
-# estimate using gn
+# estimate using Qn, gn
 result <- gentmle(initdata, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
 print(result)
 
-# estimate using g0
-initdata2 <- initdata
+# estimate using Q0, g0
+initdata2 <- as.list(data)
+initdata2$Q_a <- sapply(A_vals, Qbar0, data[, Wnodes])
 initdata2$pA <- g0(data[, Wnodes])
-result2 <- gentmle(initdata2, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
-print(result2) 
+dim(initdata2)
+kprint(result2)
+mean(testdata$Y)
+testdata <- gen_data(1e+05)
+data <- testdata 
 }
 

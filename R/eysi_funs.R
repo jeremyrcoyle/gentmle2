@@ -24,6 +24,7 @@ eysi_update <- function(tmledata, Q.trunc = 0.001, ...) {
 eysi_estimate <- function(tmledata, ...) {
     
     # assign probs under stochastic intervention
+    n <- nrow(tmledata)
     A_vals <- vals_from_factor(tmledata$A)
     tmledata$pAstar <- sapply(A_vals, function(A_val) gstar(rep(A_val, n), tmledata$pA))
     

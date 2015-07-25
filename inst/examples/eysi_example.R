@@ -1,5 +1,4 @@
-######
-# Example of TMLE for a stochastic intervention mean E[Y_gstar]
+###### Example of TMLE for a stochastic intervention mean E[Y_gstar]
 
 Qbar0 <- function(A, W) {
     
@@ -43,7 +42,7 @@ gen_data <- function(n = 1000, p = 4) {
     data.frame(W, A, Y, Q0aW, d0, Yd0)
 }
 
-data <- gen_data(1000, 5)
+data <- gen_data(1e5, 5)
 
 Anode <- "A"
 Wnodes <- grep("^W", names(data), value = T)
@@ -67,19 +66,21 @@ gstar <- function(A, gk) {
     ifelse(A == 1, gk[, 1] + gk[, 2], ifelse(A == 3, gk[, 3], 0))
 }
 
+# estimate using Qn, gn
 # Initial data set-up
 initdata <- data
 initdata$Q_a <- Q_a
 initdata$pA <- pA
 
-# estimate using Qn, gn
 result <- gentmle(initdata, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
 print(result)
 
 # estimate using Q0, g0
-initdata <- data
-initdata$Q_a <- sapply(A_vals,Qbar0,data[,Wnodes])
-initdata2 <- initdata
+# Initial data set-up
+initdata2 <- data
+initdata2$Q_a <- sapply(A_vals, Qbar0, data[, Wnodes])
 initdata2$pA <- g0(data[, Wnodes])
+
 result2 <- gentmle(initdata2, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
 print(result2) 
+mean(data$Y)

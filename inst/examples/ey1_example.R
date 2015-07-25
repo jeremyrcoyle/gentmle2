@@ -1,5 +1,4 @@
-######
-# Example of TMLE for the treatment-specific mean E[Y_1]
+###### Example of TMLE for the treatment-specific mean E[Y_1]
 
 Qbar0 <- function(A, W) {
     W1 <- W[, 1]
@@ -39,6 +38,3 @@ print(result)
 tmledata2 <- data.frame(A = data$A, Y = data$Y, gk = gk, QAk = Qk, Q1k = Q1k, Q0k = Q0k)
 result2 <- gentmle(tmledata2, ey1_estimate2, ey1_update2)
 print(result2) 
-
-
-
