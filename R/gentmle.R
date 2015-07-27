@@ -23,7 +23,7 @@ logit_fluctuate <- function(tmledata, flucmod, truncate = 0) {
 #' @title gentmle
 #' @description General TMLE function that takes care of the bookkeeping of estimation and update steps.
 #' 
-#' @param estiamte_fun Function for estimation step
+#' @param estimate_fun Function for estimation step
 #' @param update_fun, Function for update step
 #' @param max_iter, Maximum number of iteration steps
 #' @param ..., Extra arguments that can be passed to update_fun and estimate_fun

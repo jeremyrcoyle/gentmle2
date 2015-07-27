@@ -13,7 +13,7 @@ gentmle(initdata, estimate_fun, update_fun, max_iter = 100, ...)
 
 \item{...,}{Extra arguments that can be passed to update_fun and estimate_fun}
 
-\item{estiamte_fun}{Function for estimation step}
+\item{estimate_fun}{Function for estimation step}
 }
 \description{
 General TMLE function that takes care of the bookkeeping of estimation and update steps.
