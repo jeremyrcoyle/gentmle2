@@ -1,5 +1,5 @@
 
-eysigma_update=function(tmledata,Q.trunc = 0.001){
+eysigmaATE_update=function(tmledata,Q.trunc = 0.001){
   #fix points where Q is already 0 or 1 - perfect prediction
   subset=with(tmledata,which(0<Qk & Qk<1))
   eps_q=0
@@ -8,7 +8,7 @@ eysigma_update=function(tmledata,Q.trunc = 0.001){
   tmledata$Qktrunc <- with(tmledata, truncate(Qk, Q.trunc))
   qfluc <- logit_fluctuate(tmledata, Y ~ -1 + HA + CYA + offset(qlogis(Qktrunc)))
   eps_q=qfluc$eps
-  tmledata$Qk <- with(tmledata, plogis(qlogis(Qktrunc) + HA * eps_q[1] + CyA * 
+  tmledata$Qk <- with(tmledata, plogis(qlogis(Qktrunc) + HA * eps_q[1] + CYA * 
                                          eps_q[2]))
   tmledata$Q1k=with(tmledata,plogis(qlogis(Q1k)+H1*eps_q[1]+CY1*eps_q[2]))
   tmledata$Q0k=with(tmledata,plogis(qlogis(Q0k)+H0*eps_q[1]+CY0*eps_q[2]))
@@ -18,7 +18,7 @@ eysigma_update=function(tmledata,Q.trunc = 0.001){
   
 }
 
-eysigma_estimate=function(tmledata,...){
+eysigmaATE_estimate=function(tmledata,...){
   
   psi=mean(tmledata$Q1k-tmledata$Q0k)
   sigma=var(tmledata$Q1k-tmledata$Q0k)
