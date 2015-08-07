@@ -75,11 +75,11 @@ ci_gentmle <- function(gentmle_obj, level = 0.95) {
     ldply(seq_len(n_ests), function(i) {
         
         est <- gentmle_obj$tmleests[i]
-        sd <- sqrt(gentmle_obj$ED2[i])/sqrt(n)
+        se <- sqrt(gentmle_obj$ED2[i])/sqrt(n)
         z <- (1 + level)/2
-        lower <- est - qnorm(z) * sd
-        upper <- est + qnorm(z) * sd
-        data.frame(parameter = names(est), est = est, sd = sd, lower = lower, upper = upper)
+        lower <- est - qnorm(z) * se
+        upper <- est + qnorm(z) * se
+        data.frame(parameter = names(est), est = est, se = se, lower = lower, upper = upper)
     })
 }
 

@@ -7,13 +7,13 @@
 gentmle(initdata, estimate_fun, update_fun, max_iter = 100, ...)
 }
 \arguments{
+\item{estimate_fun}{Function for estimation step}
+
 \item{update_fun,}{Function for update step}
 
 \item{max_iter,}{Maximum number of iteration steps}
 
 \item{...,}{Extra arguments that can be passed to update_fun and estimate_fun}
-
-\item{estimate_fun}{Function for estimation step}
 }
 \description{
 General TMLE function that takes care of the bookkeeping of estimation and update steps.
@@ -103,7 +103,7 @@ gen_data <- function(n = 1000, p = 4) {
     data.frame(W, A, Y, Q0aW, d0, Yd0)
 }
 
-data <- gen_data(1000, 5)
+data <- gen_data(1e+05, 5)
 
 Anode <- "A"
 Wnodes <- grep("^W", names(data), value = T)
@@ -127,27 +127,21 @@ gstar <- function(A, gk) {
     ifelse(A == 1, gk[, 1] + gk[, 2], ifelse(A == 3, gk[, 3], 0))
 }
 
-gstar <- function(A, gk) {
-    rowSums(factor_to_indicators(A) * gk)
-}
-
-# Initial data set-up
-initdata <- as.list(data)
+# estimate using Qn, gn Initial data set-up
+initdata <- data
 initdata$Q_a <- Q_a
 initdata$pA <- pA
 
-# estimate using Qn, gn
 result <- gentmle(initdata, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
 print(result)
 
-# estimate using Q0, g0
-initdata2 <- as.list(data)
+# estimate using Q0, g0 Initial data set-up
+initdata2 <- data
 initdata2$Q_a <- sapply(A_vals, Qbar0, data[, Wnodes])
 initdata2$pA <- g0(data[, Wnodes])
-dim(initdata2)
-kprint(result2)
-mean(testdata$Y)
-testdata <- gen_data(1e+05)
-data <- testdata 
+
+result2 <- gentmle(initdata2, eysi_estimate, eysi_update, max_iter = 100, gstar = gstar)
+print(result2)
+mean(data$Y) 
 }
 
