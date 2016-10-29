@@ -1,8 +1,7 @@
-setwd("~/Dropbox/gentmle2/")
-dev_mode()
-build()
-install()
+library(devtools)
+install_github("jeremyrcoyle/gentmle")
 
+library(gentmle2)
 ##################################
 # generate some data
 Qbar0 <- function(A, W) {
@@ -30,14 +29,15 @@ gen_data <- function(n = 1000, p = 2) {
     data.frame(W, A, Y, Y0, Y1)
 }
 
-data <- gen_data(1000)
+n=1000
+data <- gen_data(n)
 Wnodes <- grep("^W", names(data), value = T)
 
 test_data <- gen_data(1e+05)
 test_data$Q1k <- Qbar0(1, test_data[, Wnodes])
 test_data$Q0k <- Qbar0(0, test_data[, Wnodes])
-psi0 <- eval(param_sigmaATE$psi, test_data)
-
+psi0_sigma <- eval(param_sigmaATE$psi, test_data)
+psi0_ATE <- eval(param_ATE$psi, test_data)
 gk <- g0(data[, Wnodes])
 Qk <- Qbar0(data$A, data[, Wnodes])
 Q1k <- Qbar0(1, data[, Wnodes])
@@ -45,6 +45,7 @@ Q0k <- Qbar0(0, data[, Wnodes])
 tmledata <- data.frame(A = data$A, Y = data$Y, gk = gk, Q1k = Q1k, Q0k = Q0k, Qk = Qk)
 
 #tmledata with crappy Q predictions (to make things at least a little interesting)
+
 bad_tmledata <- data.frame(A = data$A, Y = data$Y, gk = gk, Q1k = runif(n), Q0k = runif(n), 
     Qk = mean(data$Y))
 
@@ -58,7 +59,6 @@ bounds <- c(0, 1)
 stiles_res <- onestep_atesig(bad_tmledata$Y, bad_tmledata$A, Q, g1W = bad_tmledata$gk, 
     depsilon = 0.001, max_iter = 100, gbounds = bounds, Qbounds = bounds)
 stiles_res$psi
-stiles_res$deriv
 stiles_res$ICmeans
 mean(eval(loss_loglik, list(Y = bad_tmledata$Y, Qk = stiles_res$Q[, "QAW"])))
 
