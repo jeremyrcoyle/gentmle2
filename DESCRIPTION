@@ -1,14 +1,11 @@
-Package: gentmle
+Package: gentmle2
 Title: Skeleton for General TMLEs
-Version: 0.0.0.9000
+Version: 0.1.0.9000
 Author: Jeremy Coyle <jeremyrcoyle@gmail.com>
 Maintainer: Jeremy Coyle <jeremyrcoyle@gmail.com>
-Description: Handles the bookkeeping for general TMLEs, allowing you to specify novel TMLEs as estimation and update functions.
+Description: Handles the bookkeeping for general TMLEs, allowing you to specify TMLE for new parameters in terms of a parameter, a clever covariate, and an influence curve
 License: GPL-3
 Depends:
     R (>= 3.0.0),
-    SuperLearner,
-    origami,
-    plyr,
-    ggplot2,
-    abind
+    boot,
+    plyr

@@ -1,4 +1,4 @@
-setwd("~/Dropbox/gentmle/")
+setwd("~/Dropbox/gentmle2/")
 library(devtools)
 library(formatR)
 rebuild <- function() {

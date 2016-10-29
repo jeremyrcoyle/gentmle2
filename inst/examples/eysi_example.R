@@ -6,8 +6,8 @@ Qbar0 <- function(A, W) {
     W2 <- W[, 2]
     W3 <- W[, 3]
     W4 <- W[, 4]
-    Qbar <- plogis(ifelse(W4 > 0, (A == 1) + (A == 1) * (5 * W1^2 - 4.45), (A == 
-        2) + (A == 3) + (A == 2) * (4 * W2) + (A == 3) * (5 * W3)))
+    Qbar <- plogis(ifelse(W4 > 0, (A == 1) + (A == 1) * (5 * W1^2 - 4.45), (A == 2) + 
+        (A == 3) + (A == 2) * (4 * W2) + (A == 3) * (5 * W3)))
     return(Qbar)
 }
 
@@ -60,8 +60,8 @@ Q_a <- sapply(A_vals, function(A_val) {
 
 pA <- predict(g_fit, newdata = data[, Wnodes])$pred
 
-# A sample gstar--treat with A=1, if the patient received A=1 or 2, otherwise
-# leave alone
+# A sample gstar--treat with A=1, if the patient received A=1 or 2, otherwise leave
+# alone
 gstar <- function(A, gk) {
     ifelse(A == 1, gk[, 1] + gk[, 2], ifelse(A == 3, gk[, 3], 0))
 }
