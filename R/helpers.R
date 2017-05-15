@@ -19,12 +19,23 @@ eval_param <- function(param, tmleenv) {
 }
 
 # evaluate risk for a given Qk
-risk_Qk <- function(Qk, tmleenv, loss = loss_loglik) {
-    mean(eval(loss, list(Qk = Qk), tmleenv))
+risk_Qk <- function(Qk, HA, tmleenv, loss = loss_loglik) {
+    mean(eval(loss, list(Qk = Qk, HA=HA), tmleenv))
 }
 
 # fluctuate on a submodel and evaluate risk for a given epsilon
 risk_eps <- function(eps, HA, tmleenv, submodel = submodel_logit, loss = loss_loglik) {
     Qk_eps <- eval(submodel, list(HA = HA, eps = eps), tmleenv)
-    risk_Qk(Qk_eps, tmleenv, loss)
+    risk_Qk(Qk_eps, HA, tmleenv, loss)
+}
+
+# evaluate mean of IC for a given Qk
+IC_Qk <- function(Qk, tmleenv, IC) {
+    -1 * mean(eval(IC, list(Qk = Qk), tmleenv))
+}
+
+# fluctuate on a submodel and evaluate mean of IC (gradient of risk) for a given epsilon
+IC_eps <- function(eps, HA, tmleenv, submodel = submodel_logit, IC = quote(HA * (Y - Qk))) {
+    Qk_eps <- eval(submodel, list(HA = HA, eps = eps), tmleenv)
+    IC_Qk(Qk_eps, tmleenv, IC)
 } 

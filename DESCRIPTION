@@ -9,3 +9,4 @@ Depends:
     R (>= 3.0.0),
     boot,
     plyr
+RoxygenNote: 6.0.1

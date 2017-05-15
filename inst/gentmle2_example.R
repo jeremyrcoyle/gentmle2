@@ -2,8 +2,7 @@ library(devtools)
 install_github("jeremyrcoyle/gentmle")
 
 library(gentmle2)
-##################################
-# generate some data
+################################## generate some data
 Qbar0 <- function(A, W) {
     W1 <- W[, 1]
     W2 <- W[, 2]
@@ -29,7 +28,7 @@ gen_data <- function(n = 1000, p = 2) {
     data.frame(W, A, Y, Y0, Y1)
 }
 
-n=1000
+n <- 1000
 data <- gen_data(n)
 Wnodes <- grep("^W", names(data), value = T)
 
@@ -44,43 +43,40 @@ Q1k <- Qbar0(1, data[, Wnodes])
 Q0k <- Qbar0(0, data[, Wnodes])
 tmledata <- data.frame(A = data$A, Y = data$Y, gk = gk, Q1k = Q1k, Q0k = Q0k, Qk = Qk)
 
-#tmledata with crappy Q predictions (to make things at least a little interesting)
+# tmledata with crappy Q predictions (to make things at least a little interesting)
 
-bad_tmledata <- data.frame(A = data$A, Y = data$Y, gk = gk, Q1k = runif(n), Q0k = runif(n), 
-    Qk = mean(data$Y))
+bad_tmledata <- data.frame(A = data$A, Y = data$Y, gk = gk, Q1k = runif(n), Q0k = runif(n), Qk = mean(data$Y))
 
-#######################################################
-#check out Jonathan's code
+####################################################### check out Jonathan's code
 source("~/Downloads/onestep_blipvar.R")
-Q <- bad_tmledata[, c("Qk", "Q1k", "Q0k")]
+Q <- bad_tmledata[, c("Qk", "Q0k", "Q1k")]
 names(Q) <- c("QAW", "Q0W", "Q1W")
 Q <- as.matrix(Q)
 bounds <- c(0, 1)
-stiles_res <- onestep_atesig(bad_tmledata$Y, bad_tmledata$A, Q, g1W = bad_tmledata$gk, 
-    depsilon = 0.001, max_iter = 100, gbounds = bounds, Qbounds = bounds)
+stiles_res <- onestep_atesig(bad_tmledata$Y, bad_tmledata$A, Q, g1W = bad_tmledata$gk, depsilon = 1e-04, max_iter = 10000, 
+    gbounds = bounds, Qbounds = bounds)
 stiles_res$psi
 stiles_res$ICmeans
 mean(eval(loss_loglik, list(Y = bad_tmledata$Y, Qk = stiles_res$Q[, "QAW"])))
 
-#recursive/one-step TMLE (should produce the same results -- it's close)
-params=list(ATE=param_ATE, sigma = param_sigmaATE)
-res <- gentmle(bad_tmledata, params = params, max_iter = 100, approach = "recursive")
+# recursive/one-step TMLE (should produce the same results -- it's close)
+params <- list(ATE = param_ATE, sigma = param_sigmaATE)
+res <- gentmle(bad_tmledata, params = params, max_iter = 10000, approach = "recursive")
 res$initests
 res$tmleests
 res$ED
 mean(eval(loss_loglik, res$tmledata))
 res$steps
 
-#full search TMLE (kinda like fitting a GLM)
+# full search TMLE (kinda like fitting a GLM)
 res <- gentmle(bad_tmledata, params = params, max_iter = 100, approach = "full")
 res$tmleests
 res$ED
 mean(eval(loss_loglik, res$tmledata))
 res$steps
 
-#one dimensional line search TMLE (somewhere in between)
-res <- gentmle(bad_tmledata, params = list(sigma = param_sigmaATE), approach = "line", 
-    max_iter = 100)
+# one dimensional line search TMLE (somewhere in between)
+res <- gentmle(bad_tmledata, params = params, approach = "line", max_iter = 100)
 res$tmleests
 res$ED
 mean(eval(loss_loglik, res$tmledata))
