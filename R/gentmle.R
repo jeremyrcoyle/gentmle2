@@ -71,7 +71,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
     risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
 
     # check for improvement
-    if ((risk >= last_risk) || all(abs(ED) < ED2/n)) {
+    if ((risk >= last_risk) || all(abs(ED) < sqrt(ED2-ED^2)/n)) {
       # we failed to improve, so give up
       j <- j - 1
       converge <- T
