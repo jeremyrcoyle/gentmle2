@@ -31,6 +31,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
     evals <- lapply(params, eval_param, tmleenv)
     Dstar <- sapply(evals, `[[`, "IC")
     ED <- apply(Dstar, 2, mean)
+    sig <- sapply(evals, function(param) sd(param$IC))
     psi <- sapply(evals, `[[`, "psi")
     if (j == 1) {
       initests <- psi
@@ -75,7 +76,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       converge <- T
       break
     }
-    if (all(abs(ED) < psi/n)) {
+    if (all(abs(ED) < sig/n)) {
       # update Qk
       tmleenv$Qk <- as.vector(eval(submodel, list(HA = HA, eps = eps, Qk = tmleenv$Qk)))
       tmleenv$Q1k <- as.vector(eval(submodel, list(HA = H1, eps = eps, Qk = tmleenv$Q1k)))
