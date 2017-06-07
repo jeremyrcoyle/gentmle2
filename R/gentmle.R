@@ -19,8 +19,16 @@ library(boot)
 #' @export
 ##' @example /inst/examples/ey1_example.R
 ##' @example /inst/examples/eysi_example.R
-gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_loglik, depsilon=1e-4, approach = "full", max_iter = 100,
-                    ...) {
+gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_loglik,
+                    depsilon = 1e-4, approach = "full", max_iter = 100,
+                    g.trunc = 1e-4, Q.trunc = 1e-4, ...) {
+
+  # truncating to avoid NA, Inf or nan loss initially
+  initdata$gk = with(initdata, truncate(gk,g.trunc))
+  initdata$Qk = with(initdata, truncate(Qk,Q.trunc))
+  initdata$Q1k = with(initdata, truncate(Q1k,Q.trunc))
+  initdata$Q0k = with(initdata, truncate(Q0k,Q.trunc))
+
   tmleenv <- list2env(initdata)
   converge <- F
   last_risk <- Inf
@@ -58,22 +66,6 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       H0 <- H0s %*% EDnormed
     }
 
-    # breaking immediately if loss is nan, Inf or NA, otherwise iterating
-    if (j==1) {
-      if (approach == "initial") {
-        eps <- 0
-      } else if (approach == "recursive") {
-        eps <- depsilon
-      } else if (approach == "line" || approach == "full") {
-        init_eps <- rep(0, ncol(HA))
-        eps <- init_eps
-      }
-      risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
-      if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
-        risk <- Inf
-        last_risk <- 0
-      }
-    } else {
       if (approach == "initial") {
         eps <- 0
       } else if (approach == "recursive") {
@@ -85,7 +77,6 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       }
 
       risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
-    }
 
     # If loss is NA,Inf or nan, end the process
     if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
@@ -104,8 +95,6 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       tmleenv$Q1k <- as.vector(eval(submodel, list(HA = H1, eps = eps, Qk = tmleenv$Q1k)))
       tmleenv$Q0k <- as.vector(eval(submodel, list(HA = H0, eps = eps, Qk = tmleenv$Q0k)))
     }
-
-
   }
 
   ED <- sapply(evals, function(param) mean(param$IC))
@@ -118,6 +107,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
 
   return(result)
 }
+
 
 #' @export
 ci_gentmle <- function(gentmle_obj, level = 0.95) {
