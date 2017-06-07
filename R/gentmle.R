@@ -100,6 +100,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
   ED <- sapply(evals, function(param) mean(param$IC))
   ED2 <- sapply(evals, function(param) mean(param$IC^2))
   ED3 <- sapply(evals, function(param) mean(param$IC^3))
+  names(psi) = paste0("psi",1:length(psi))
   result <- list(initdata = initdata, tmledata = data.frame(as.list(tmleenv)), initests = initests, tmleests = psi, steps = j,
                  Dstar = Dstar, ED = ED, ED2 = ED2, ED3 = ED3)
 
