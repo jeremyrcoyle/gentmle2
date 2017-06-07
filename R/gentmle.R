@@ -58,6 +58,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       H0 <- H0s %*% EDnormed
     }
 
+    # breaking immediately if loss is nan, Inf or NA, otherwise iterating
     if (j==1) {
       if (approach == "initial") {
         eps <- 0
@@ -86,6 +87,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
     }
 
+    # If loss is NA,Inf or nan, end the process
     if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
       risk <- Inf
       last_risk <- 0
