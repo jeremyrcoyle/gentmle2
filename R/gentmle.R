@@ -58,18 +58,38 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       H0 <- H0s %*% EDnormed
     }
 
-    if (approach == "initial") {
-      eps <- 0
-    } else if (approach == "recursive") {
-      eps <- depsilon
-    } else if (approach == "line" || approach == "full") {
-      init_eps <- rep(0, ncol(HA))
-      opt <- optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss)
-      eps <- opt$par
+    if (j==1) {
+      if (approach == "initial") {
+        eps <- 0
+      } else if (approach == "recursive") {
+        eps <- depsilon
+      } else if (approach == "line" || approach == "full") {
+        init_eps <- rep(0, ncol(HA))
+        eps <- init_eps
+      }
+      risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
+      if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
+        risk <- Inf
+        last_risk <- 0
+      }
+    } else {
+      if (approach == "initial") {
+        eps <- 0
+      } else if (approach == "recursive") {
+        eps <- depsilon
+      } else if (approach == "line" || approach == "full") {
+        init_eps <- rep(0, ncol(HA))
+        opt <- optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss)
+        eps <- opt$par
+      }
+
+      risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
     }
 
-    risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
-
+    if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
+      risk <- Inf
+      last_risk <- 0
+    }
     # check for improvement
     if ((risk >= last_risk) || all(abs(ED) < sqrt(ED2-ED^2)/n)) {
       # we failed to improve, so give up
