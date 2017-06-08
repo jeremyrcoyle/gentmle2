@@ -99,7 +99,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       tmleenv$Qk <- as.vector(eval(submodel, list(HA = HA, eps = eps, Qk = tmleenv$Qk)))
       tmleenv$Q1k <- as.vector(eval(submodel, list(HA = H1, eps = eps, Qk = tmleenv$Q1k)))
       tmleenv$Q0k <- as.vector(eval(submodel, list(HA = H0, eps = eps, Qk = tmleenv$Q0k)))
-      if (any(tmleenv$Q0k==1||tmleenv$Q0k==0||tmleenv$Q1k==1||tmleenv$Q1k==0||)) break
+      if (any(tmleenv$Q0k==0)||any(tmleenv$Q0k==1)||any(tmleenv$Q1k==0)||any(tmleenv$Q1k==1)) break
     }
   }
 
