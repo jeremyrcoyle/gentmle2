@@ -72,6 +72,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
         eps <- depsilon
       } else if (approach == "line" || approach == "full") {
         init_eps <- rep(0, ncol(HA))
+        eps = init_eps
         risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
         if (is.nan(risk) | is.na(risk) | is.infinite(risk)) {
           coverge = F
