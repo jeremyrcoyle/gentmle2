@@ -72,8 +72,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
         eps <- depsilon
       } else if (approach == "line" || approach == "full") {
         init_eps <- rep(0, ncol(HA))
-        eps = init_eps
-        risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
+        risk <- risk_eps(init_eps, HA, tmleenv,submodel=submodel,loss=loss)
         if (is.nan(risk) | is.na(risk) | is.infinite(risk)) {
           converge = F
           break
@@ -100,6 +99,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
       tmleenv$Qk <- as.vector(eval(submodel, list(HA = HA, eps = eps, Qk = tmleenv$Qk)))
       tmleenv$Q1k <- as.vector(eval(submodel, list(HA = H1, eps = eps, Qk = tmleenv$Q1k)))
       tmleenv$Q0k <- as.vector(eval(submodel, list(HA = H0, eps = eps, Qk = tmleenv$Q0k)))
+      if (any(tmleenv$Q0k==1||tmleenv$Q0k==0||tmleenv$Q1k==1||tmleenv$Q1k==0||)) break
     }
   }
 
