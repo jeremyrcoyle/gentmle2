@@ -75,7 +75,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
         eps = init_eps
         risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
         if (is.nan(risk) | is.na(risk) | is.infinite(risk)) {
-          coverge = F
+          converge = F
           break
         }
         opt <- optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss)
