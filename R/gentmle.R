@@ -77,10 +77,13 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
           converge = F
           break
         }
-        opt <- optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss)
+        opt <- try(optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss))
+        if (class(opt=="try-error")) {
+          converge = F
+          break
+        }
         eps <- opt$par
       }
-
     risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
 
     # If loss is NA,Inf or nan, end the process
@@ -108,7 +111,7 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
   ED3 <- sapply(evals, function(param) mean(param$IC^3))
   names(psi) = paste0("psi",1:length(psi))
   result <- list(initdata = initdata, tmledata = data.frame(as.list(tmleenv)), initests = initests, tmleests = psi, steps = j,
-                 Dstar = Dstar, ED = ED, ED2 = ED2, ED3 = ED3)
+                 Dstar = Dstar, ED = ED, ED2 = ED2, ED3 = ED3, converge = converge)
 
   class(result) <- "gentmle"
 
