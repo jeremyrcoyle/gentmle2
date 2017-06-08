@@ -77,8 +77,9 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
           converge = F
           break
         }
-        opt <- try(optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss))
-        if (class(opt=="try-error")) {
+        opt <- try(optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv,
+                         method = "L-BFGS-B", submodel=submodel, loss=loss),silent=TRUE)
+        if (class(opt)=="try-error") {
           converge = F
           break
         }
