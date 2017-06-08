@@ -72,11 +72,16 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
         eps <- depsilon
       } else if (approach == "line" || approach == "full") {
         init_eps <- rep(0, ncol(HA))
+        risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
+        if (is.nan(risk) | is.na(risk) | is.infinite(risk)) {
+          coverge = F
+          break
+        }
         opt <- optim(par = init_eps, risk_eps, HA = HA, tmleenv = tmleenv, method = "L-BFGS-B", submodel=submodel, loss=loss)
         eps <- opt$par
       }
 
-      risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
+    risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
 
     # If loss is NA,Inf or nan, end the process
     if(is.nan(risk) | is.na(risk) | is.infinite(risk)) {
