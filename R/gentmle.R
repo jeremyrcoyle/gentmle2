@@ -30,6 +30,7 @@ library(boot)
 #' @example /inst/examples/ey1_example.R
 #' @example /inst/examples/ATE_example.R
 #' @example /inst/examples/sigmaATE_example.R
+#' @example /inst/examples/eysigmaATE_example.R
 #'
 gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_loglik,
                     depsilon = 1e-4, approach = "full", max_iter = 100,
