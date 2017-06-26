@@ -8,7 +8,10 @@ library(boot)
 
 #' @title gentmle
 #' @description General TMLE function that takes care of the bookkeeping of estimation and update steps.
-#'
+#' @param initdata, data.frame with the following names: A is the treatment vector, Y is the outcome
+#' Qk is the initial prediction for the outcome, Q1k is the initial prediction setting A to 1,
+#' Q0k is the initial prediction for the outcome setting A = 0.  gk is the initial fit
+#' for the treatment mechanism.
 #' @param params, named list of parameters to estimate. See define_param for details
 #' @param submodel, submodel along which to fluctuate
 #' @param loss, loss function to optimize
