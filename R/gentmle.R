@@ -9,19 +9,27 @@ library(boot)
 #' @title gentmle
 #' @description General TMLE function that takes care of the bookkeeping of estimation and update steps.
 #'
-#' @param paramlist, named list of parameters to estimate. See define_param for details
+#' @param params, named list of parameters to estimate. See define_param for details
 #' @param submodel, submodel along which to fluctuate
 #' @param loss, loss function to optimize
-#' @param depsilon, small epsilon for the recurisve approach
+#' @param depsilon, small epsilon, used for the recurisve approach only
 #' @param approach, One of initial, recursive (small delta), line, full
-#' @param max_iter, Maximum number of iteration steps
+#' @param max_iter, Maximum number of iteration steps. 100 is almost always more
+#' than sufficient for full or line approach.  Try 10000 for recursive approach and
+#' very occasionally you might need more.
+#' @param g.trunc, To keep treatment mechanism probs between [g.trunc, 1 - g.trunc].
+#' Prevents practical positivity violations from making highly variant estimates
+#' @param Q.trunc, To keep outcome prediction probs between [Q.trunc, 1 - Q.trunc].
+#' This prevents infinite loss in case of log-likelihood loss
 #'
 #' @export
-##' @example /inst/examples/ey1_example.R
-##' @example /inst/examples/eysi_example.R
+#' @example /inst/examples/ey1_example.R
+#' @example /inst/examples/ATE_example.R
+#' @example /inst/examples/sigmaATE_example.R
+#'
 gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_loglik,
                     depsilon = 1e-4, approach = "full", max_iter = 100,
-                    g.trunc = 1e-4, Q.trunc = 1e-4, ...) {
+                    g.trunc = 1e-4, Q.trunc = 1e-4, simultaneous.inference = FALSE, ...) {
 
   # truncating to avoid NA, Inf or nan loss initially
   initdata$gk = with(initdata, truncate(gk,g.trunc))
@@ -111,8 +119,10 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
   ED2 <- sapply(evals, function(param) mean(param$IC^2))
   ED3 <- sapply(evals, function(param) mean(param$IC^3))
   names(psi) = paste0("psi",1:length(psi))
+
   result <- list(initdata = initdata, tmledata = data.frame(as.list(tmleenv)), initests = initests, tmleests = psi, steps = j,
-                 Dstar = Dstar, ED = ED, ED2 = ED2, ED3 = ED3, converge = converge)
+                 Dstar = Dstar, ED = ED, ED2 = ED2, ED3 = ED3, converge = converge,
+                 simultaneous.inference = simultaneous.inference)
 
   class(result) <- "gentmle"
 
@@ -129,9 +139,15 @@ ci_gentmle <- function(gentmle_obj, level = 0.95) {
 
     est <- gentmle_obj$tmleests[i]
     se <- sqrt(gentmle_obj$ED2[i])/sqrt(n)
-    z <- (1 + level)/2
-    lower <- est - qnorm(z) * se
-    upper <- est + qnorm(z) * se
+    if (gentmle_obj$simultaneous.inference == TRUE){
+      S = cor(gentmle_obj$Dstar)
+      Z = rmvnorm(1000000, rep(0,ncol(gentmle_obj$Dstar)), S)
+      Z_abs = apply(Z,1,FUN = function(x) max(abs(x)))
+      z = quantile(Z_abs, level)
+    } else {z <- qnorm((1 + level)/2)}
+
+    lower <- est - z * se
+    upper <- est + z * se
     data.frame(parameter = names(est), est = est, se = se, lower = lower, upper = upper)
   })
 }
@@ -139,8 +155,8 @@ ci_gentmle <- function(gentmle_obj, level = 0.95) {
 #' @export
 print.gentmle <- function(gentmle_obj) {
   cat(sprintf("TMLE ran for %d step(s)\n", gentmle_obj$steps))
-  EDtext <- sprintf("E[%s]=%1.2e", names(gentmle_obj$ED), gentmle_obj$ED)
-  cat(sprintf("The mean of the IC is %s\n", paste(EDtext, collapse = ", ")))
+  # EDtext <- sprintf("E[%s]=%1.2e", names(result$ED), gentmle_obj$ED)
+  # cat(sprintf("The mean of the IC is %s\n", result$ED))
 
   cat("\n\n")
   print(ci_gentmle(gentmle_obj))

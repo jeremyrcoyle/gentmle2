@@ -1,35 +1,52 @@
-gendata <- function(n) {
-    W1 <- rnorm(n)
-    W2 <- rnorm(n)
-    W3 <- rnorm(n)
-    W4 <- rnorm(n)
-    A <- rbinom(n, 1, g0(W1, W2, W3, W4))
-    Y <- rbinom(n, 1, Q0(A, W1, W2, W3, W4))
-    data.frame(W1, W2, W3, W4, A, Y)
+###### Example of TMLE for variance of conditional average treatment effect or blip variance
+###### var(E[Y|A=1, W] - E[Y|A=0, W])
+
+Qbar0 <- function(A, W) {
+    W1 <- W[, 1]
+    W2 <- W[, 2]
+    Qbar <- plogis(A + A * W1 + W2)
+    return(Qbar)
 }
 
-g0 <- function(W1, W2, W3, W4) {
-    plogis(-0.28 * W1 + 0.5 * W2 + 0.08 * W3 - 2 * W4)
+g0 <- function(W) {
+    W1 <- W[, 1]
+    W2 <- W[, 2]
+    # rep(0.5, nrow(W))
+    plogis(0.25 * W1 - 0.1 * W2)
 }
-Q0 <- function(A, W1, W2, W3, W4) {
-    plogis(4 * A + 20 * A * W2 - 50 * W4^2 - 10 * W3^2 + W1 * W2)
+
+gen_data <- function(n = 1000, p = 2) {
+    W <- matrix(rnorm(n * p), nrow = n)
+    colnames(W) <- paste("W", seq_len(p), sep = "")
+    A <- rbinom(n, 1, g0(W))
+    u <- runif(n)
+    Y <- as.numeric(u < Qbar0(A, W))
+    data.frame(W, A, Y)
 }
 
-initdata <- gendata(1000)
-data1 <- initdata
-data1$A <- 1
-data0 <- initdata
-data0$A <- 0
+data <- gen_data(1000)
+Wnodes <- grep("^W", names(data), value = T)
+gk <- g0(data[, Wnodes])
+Qk <- Qbar0(data$A, data[, Wnodes])
+Q1k <- Qbar0(1, data[, Wnodes])
+Q0k <- Qbar0(0, data[, Wnodes])
 
-Qfit <- glm(Y ~ A + W1 + W2 + W3 + W4, data = initdata, family = binomial(link = "logit"))
-gfit <- glm(A ~ W1 + W2 + W3 + W4, data = initdata, family = binomial(link = "logit"))
+# notice here we specify two parameters to be simultaneously estimated
+initdata <- data.frame(A = data$A, Y = data$Y, gk = gk, Qk = Qk, Q1k = Q1k, Q0k = Q0k)
+result <- gentmle(initdata = initdata, params = list(param_ATE, param_sigmaATE),
+                  approach = "recursive", max_iter = 10000)
+print(result)
 
-initdata$gk <- predict(gfit, type = "response")
-initdata$Qk <- predict(Qfit, type = "response")
-initdata$Q1k <- predict(Qfit, newdata = data1, type = "response")
-initdata$Q0k <- predict(Qfit, newdata = data0, type = "response")
+# for iterative TMLE, choose full--different approaches sometimes give slightly
+# different answers
+result <- gentmle(initdata = initdata, params = list(param_ATE, param_sigmaATE),
+                  approach = "full")
+print(result)
 
-results <- gentmle(initdata, eysigmaATE_estimate, eysigmaATE_update, max_iter = 100)
+# One can also form simultaneous confidence bounds for numerous params using the
+# influence curves by specifying simultaneous.inference = TRUE
+result <- gentmle(initdata = initdata, params = list(param_ATE, param_sigmaATE),
+                  approach = "recursive", simultaneous.inference = TRUE)
+print(result)
 
-CI <- ci_gentmle(results, level = 0.95)
-CI 
+
