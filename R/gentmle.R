@@ -140,17 +140,15 @@ ci_gentmle <- function(gentmle_obj, level = 0.95) {
 
   n <- nrow(gentmle_obj$initdata)
   n_ests <- length(gentmle_obj$tmleests)
+  if (gentmle_obj$simultaneous.inference == TRUE){
+    S = cor(gentmle_obj$Dstar)
+    Z = rmvnorm(1000000, rep(0,ncol(gentmle_obj$Dstar)), S)
+    Z_abs = apply(Z,1,FUN = function(x) max(abs(x)))
+    z = quantile(Z_abs, level)
+  } else {z <- qnorm((1 + level)/2)}
   ldply(seq_len(n_ests), function(i) {
-
     est <- gentmle_obj$tmleests[i]
     se <- sqrt(gentmle_obj$ED2[i])/sqrt(n)
-    if (gentmle_obj$simultaneous.inference == TRUE){
-      S = cor(gentmle_obj$Dstar)
-      Z = rmvnorm(1000000, rep(0,ncol(gentmle_obj$Dstar)), S)
-      Z_abs = apply(Z,1,FUN = function(x) max(abs(x)))
-      z = quantile(Z_abs, level)
-    } else {z <- qnorm((1 + level)/2)}
-
     lower <- est - z * se
     upper <- est + z * se
     data.frame(parameter = names(est), est = est, se = se, lower = lower, upper = upper)
