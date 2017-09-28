@@ -108,7 +108,16 @@ gentmle <- function(initdata, params, submodel = submodel_logit, loss = loss_log
     # check for improvement
     if ((risk >= last_risk) || all(abs(ED) < sqrt(ED2-ED^2)/n)) {
       # we failed to improve, so give up
-      j <- j - 1
+      if (approach == "recursive") {
+        j <- j - 1
+      }
+      if (approach != "recursive") {
+        evals <- lapply(params, eval_param, tmleenv)
+        Dstar <- sapply(evals, `[[`, "IC")
+        ED <- apply(Dstar, 2, mean)
+        ED2 <- apply(Dstar^2, 2, mean)
+        psi <- sapply(evals, `[[`, "psi")
+     }
       converge <- T
       break
     } else {
