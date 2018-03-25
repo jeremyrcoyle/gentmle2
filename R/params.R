@@ -1,5 +1,5 @@
 
-# E_W[E[Y|A=1,W]]
+## E_W[E[Y|A=1,W]]
 #' @export
 param_EY1 <- define_param(psi = "mean(Q1k)", HA = "A/gk", IC = "HA*(Y-Qk)+Q1k-psi")
 
