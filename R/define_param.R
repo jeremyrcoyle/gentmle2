@@ -44,14 +44,14 @@ expr_sub <- function(expr, env) {
     as.expression(subbed)
 }
 
-define_param <- function(psi, HA, IC) {
+define_param <- function(psi, HA, CA, IC) {
     # get default
     args <- formals()
-    
+
     # replace defaults with user arguments when specified
     user_args <- as.list(match.call(expand.dots = TRUE))[-1]
     args[names(user_args)] <- user_args
-    
+
     # verify we have language objects, not strings
     sapply(args, str_to_lang)
-} 
+}
