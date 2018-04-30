@@ -186,6 +186,7 @@ gentmle_eps <- function(initdata, params, submodel = submodel_logit, loss = loss
 
   initests <- NULL
   n <- length(initdata$Y)
+  eps = c()
   for (j in seq_len(max_iter)) {
     # print('Qks') print(mean(tmleenv$Qk)) print(mean(tmleenv$Q1k)) print(mean(tmleenv$Q0k))
 
@@ -218,9 +219,9 @@ gentmle_eps <- function(initdata, params, submodel = submodel_logit, loss = loss
     }
 
     if (approach == "initial") {
-      eps <- 0
+      eps[1] <- 0
     } else if (approach == "recursive") {
-      eps <- depsilon
+      eps[1] <- depsilon
     } else if (approach == "line" || approach == "full") {
       init_eps <- rep(0, ncol(HA))
       risk <- risk_eps(init_eps, HA, tmleenv,submodel=submodel,loss=loss)
@@ -234,7 +235,7 @@ gentmle_eps <- function(initdata, params, submodel = submodel_logit, loss = loss
         converge = F
         break
       }
-      eps <- opt$par
+      eps[j] <- opt$par
     }
     risk <- risk_eps(eps, HA, tmleenv,submodel=submodel,loss=loss)
 
