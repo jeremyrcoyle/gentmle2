@@ -170,11 +170,6 @@ print.gentmle <- function(gentmle_obj) {
 
 
 #' @export
-#' @example /inst/examples/ey1_example.R
-#' @example /inst/examples/ATE_example.R
-#' @example /inst/examples/sigmaATE_example.R
-#' @example /inst/examples/eysigmaATE_example.R
-#'
 gentmle_eps <- function(initdata, params, submodel = submodel_logit, loss = loss_loglik,
                     depsilon = 1e-4, approach = "full", max_iter = 100,
                     g.trunc = 1e-4, Q.trunc = 1e-4, simultaneous.inference = FALSE, ...) {
