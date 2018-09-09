@@ -19,3 +19,6 @@ param_ATT <- define_param(psi = "mean((Q1k-Q0k)*gk/mean(A))", HA = "A/mean(A) - 
 #' @export
 param_EB2 <- define_param(psi = "mean((Q1k-Q0k)^2)", HA = "2 * (Q1k - Q0k) * (A/gk - (1 - A)/(1 - gk))",
                           IC = "HA*(Y-Qk)+(Q1k - Q0k)^2 - psi")
+
+
+
