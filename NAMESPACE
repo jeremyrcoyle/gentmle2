@@ -3,7 +3,6 @@
 S3method(print,gentmle)
 export(ci_gentmle)
 export(gentmle)
-export(gentmle_eps)
 export(loss_loglik)
 export(loss_loglik_wts)
 export(param_ATE)

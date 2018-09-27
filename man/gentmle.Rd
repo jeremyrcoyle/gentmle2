@@ -74,7 +74,7 @@ result <- gentmle(initdata = initdata, params = list(param_EY1), approach = "rec
 print(result)
 
 ###### Example of TMLE for the average treatment effect
-
+library(gentmle2)
 Qbar0 <- function(A, W) {
     W1 <- W[, 1]
     W2 <- W[, 2]
@@ -86,7 +86,9 @@ g0 <- function(W) {
     W1 <- W[, 1]
     W2 <- W[, 2]
     # rep(0.5, nrow(W))
-    plogis(0.25 * W1 - 0.1 * W2+5)
+    plogis(0.4 * W1 - 0.8 * W2
+           +(W1>0) * 1+1
+           )
 }
 
 gen_data <- function(n = 1000, p = 2) {
@@ -101,16 +103,17 @@ gen_data <- function(n = 1000, p = 2) {
 # truth
 data <- gen_data(5000000)
 Wnodes <- grep("^W", names(data), value = T)
-gk <- g0(data[, Wnodes])
+hist(gk <- g0(data[, Wnodes]), breaks = 200)
 Qk <- Qbar0(data$A, data[, Wnodes])
 Q1k <- Qbar0(1, data[, Wnodes])
 Q0k <- Qbar0(0, data[, Wnodes])
-mean(Q1k - Q0k)
+ATE0 = mean(Q1k - Q0k)
 
 # sample
-data <- gen_data(500)
+data <- gen_data(300)
 Wnodes <- grep("^W", names(data), value = T)
 gk <- g0(data[, Wnodes])
+hist(gk)
 Qk <- Qbar0(data$A, data[, Wnodes])
 Q1k <- Qbar0(1, data[, Wnodes])
 Q0k <- Qbar0(0, data[, Wnodes])
@@ -118,29 +121,32 @@ Q0k <- Qbar0(0, data[, Wnodes])
 # for 1 step TMLE a la Mark van der Laan's new work choose recursive approach with a lot
 # of iterations
 initdata <- data.frame(A = data$A, Y = data$Y, gk = gk, Qk = Qk, Q1k = Q1k, Q0k = Q0k)
-result <- gentmle(initdata = initdata, params = list(param_ATE),
-                  approach = "recursive", max_iter = 1)
-print(result)
+# result <- gentmle(initdata = initdata, params = list(param_ATE),
+#                   approach = "recursive", max_iter = 1)
+# print(result)
 
 # for iterative TMLE, choose full or line if 1-d parameter
-result <- gentmle(initdata = initdata, params = list(param_EY1),
+result <- gentmle(initdata = initdata, params = list(param_ATE),
                   submodel = submodel_logit,
                   loss = loss_loglik,
-                  approach = "full",
+                  approach = "line",
                   max_iter = 100)
 
 # for iterative TMLE, choose full or line if 1-d parameter, weighted loss with intercept model
-result1 <- gentmle(initdata = initdata, params = list(param_EY1),
+result1 <- gentmle(initdata = initdata, params = list(param_ATE),
                   submodel = submodel_logit_intercept,
                   loss = loss_loglik_wts,
-                  approach = "full",
-                  max_iter = 100)
+                  approach = "line",
+                  max_iter = 10000)
 print(result)
 print(result1)
+ATE0
 # initial ests will be the same
 print(result1$initests)
-mean(result1$Dstar)
-mean(result$Dstar)
+colMeans(result1$Dstar)
+colMeans(result$Dstar)
+result1$converge
+result$converge
 ###### Example of TMLE for variance of conditional average treatment effect or blip variance
 ###### var(E[Y|A=1, W] - E[Y|A=0, W])
 
